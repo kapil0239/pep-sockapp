@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pep-app.fullname" . }}-sample-app
+  labels:
+    app: sample-app
+  {{- include "pep-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.sampleApp.replicas }}
+  selector:
+    matchLabels:
+      app: sample-app
+    {{- include "pep-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: sample-app
+      {{- include "pep-app.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.sampleApp.sampleAppContainer.image.repository }}:{{ .Values.sampleApp.sampleAppContainer.image.tag
+          | default .Chart.AppVersion }}
+        name: sample-app-container
+        ports:
+        - containerPort: 8079
+        resources: {{- toYaml .Values.sampleApp.sampleAppContainer.resources | nindent
+          10 }}
